@@ -1,0 +1,20 @@
+-webkit-tap-highlight-color： 这个属性只用于iOS (iPhone和iPad)。当你点击一个链接或者通过Javascript定义的可点击元素的时候，它就会出现一个半透明的灰色背景。要重设这个表现，你可以设置-webkit-tap-highlight-color为任何颜色。
+-khtml-user-select：
+  -moz-user-select：
+       user-select：none：用none,子元素所有的文字都不能选择，包括input输入框中的文字也不能选择。-moz-all：子元素所有的文字都可以被选择，但是input输入框中的文字不可以被选择。-moz-none：子元素所有的文字都不能选择，但是input输入框中的文字除外。
+-webkit-touch-callout：当你触摸并按住触摸目标时候，禁止或显示系统默认菜单。
+-webkit-backface-visibility：
+   -moz-backface-visibility：
+    -ms-backface-visibility：
+        backface-visibility：隐藏（hidden）/显示（visibility）被旋转的 div 元素的背面：
+-webkit-transform-style：
+        transform-style：规定如何在 3D 空间中呈现被嵌套的元素。该属性必须与 transform 属性一同使用。
+-webkit-transform-origin：
+   -moz-transform-origin：
+    -ms-transform-origin：
+        transform-origin：设置旋转元素的基点位置
+letter-spacing：设置字符间间距（左右与上下）
+<timing-function>：一个用于animation的函数，指定一个两个关键帧之间的动画播放形式，比如ease-in
+resize：是否允许宽/高被缩放（如textarea）
+text-rendering：定义浏览器渲染引擎如何渲染字体。浏览器会在速度、清晰度、几何精度之间进行权衡。
+word-spacing：单词间空格

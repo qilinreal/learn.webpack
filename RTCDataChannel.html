@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>test</title>
+</head>
+
+<body>
+    <button>test</button>
+    <script>
+        document.querySelector("button").addEventListener("click", connection);
+        let o = {};
+        function connection() {
+            document.querySelector("button").innerHTML = "clicked";
+            document.querySelector("button").disabled = true;
+
+            let pc1 = o.pc1 = new RTCPeerConnection();
+            let pc2 = o.pc2 = new RTCPeerConnection();
+            // 在setLocalDescription后发生onicecandidate
+            // 在setRemoteDescription后允许addIceCandidate
+            pc1.onicecandidate = e => console.log(e.candidate) || e.candidate && pc2.addIceCandidate(e.candidate) && console.log(123);
+            pc2.onicecandidate = e => console.log(e.candidate) || e.candidate && pc1.addIceCandidate(e.candidate) && console.log(456);
+
+            let c1 = o.c1 = pc1.createDataChannel(null);
+            let c2 = o.c2 = undefined;
+            c1.onopen = () => {
+                console.log("c1 opened.");
+            };
+            c1.onmessage = e => console.log(e.data);
+            c1.onclose = () => console.log("c1 closed.");
+
+            pc2.ondatachannel = e => {
+                console.log("d c");
+                c2 = e.channel;
+                c2.onmessage = e => console.log(`r: ${e.data}`);
+                c2.onopen = () => console.log("c2 o");
+                c2.onclose = () => console.log("c2 c");
+            };
+
+            pc1.createOffer()
+                .then(s => pc1.setLocalDescription(s))
+                .then(() => pc2.setRemoteDescription(pc1.localDescription))
+                // 在addIceCandidate后方可执行
+                .then(() => pc2.createAnswer())
+                .then(s => pc2.setLocalDescription(s))
+                .then(() => pc1.setRemoteDescription(pc2.localDescription))
+                .then(() => console.log("finish"))
+                .catch(() => console.log("error"));
+        }
+    </script>
+</body>
+
+</html>

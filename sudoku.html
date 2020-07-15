@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sudoku v1.03</title>
+    <style>
+        @media screen and (min-width: 1444px) {
+            #sudoku {
+                padding: 5em;
+            }
+        }
+
+        #sudoku {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            box-sizing: content-box;
+            display: flex;
+            align-content: stretch;
+        }
+
+        #game {
+            flex: 1;
+            border: 1px solid;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            cursor: default;
+            user-select: none;
+        }
+
+        #state {
+            min-width: 20em;
+            border: 1px solid;
+            font-family: sans-serif;
+        }
+
+        #game-pannel {
+            border: oldlace solid;
+
+            display: grid;
+            grid-template-rows: repeat(9, 5em);
+            grid-template-columns: repeat(9, 5em);
+        }
+
+        /* 普通状态 */
+        .cell {
+            border: 1px solid gray;
+            text-align: center;
+            vertical-align: middle;
+            line-height: 2em;
+            font-size: 2.5em;
+            font-family: Consolas, sans-serif;
+
+            position: relative;
+        }
+
+        .cell:nth-child(3n) {
+            border-right: 3px solid black;
+        }
+
+        .cell:nth-child(9n) {
+            border-right: 1px solid black;
+        }
+
+        .cell:nth-child(n+19):nth-child(-n+27),
+        .cell:nth-child(n+46):nth-child(-n+54) {
+            border-bottom: 3px solid black;
+        }
+
+        .cell:hover,
+        .cell:focus {
+            box-shadow: rgb(226, 230, 19) 0 0 2em inset;
+            z-index: 0;
+        }
+
+        .edited {
+            color: blue;
+        }
+
+        .danger {
+            color: red;
+        }
+
+        /* 禁止状态 */
+        .not-allowed {
+            cursor: not-allowed;
+        }
+
+        .not-allowed>.cell:hover,
+        .not-allowed>.cell:focus {
+            box-shadow: gray 0 0 2em inset;
+        }
+
+        /* 光标 */
+        @keyframes cursor-decoration {
+            from {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            51% {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 0;
+            }
+        }
+
+        .cursor-decoration {
+            animation: cursor-decoration 1s linear 0s infinite normal forwards;
+            position: absolute;
+            bottom: .1em;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            z-index: 1;
+        }
+
+        .cursor-decoration>div {
+            border: 5px solid black;
+            width: 75%;
+            margin: auto;
+        }
+
+        /* 按钮 */
+        button {
+            margin: .1em;
+            padding: .1em .5em;
+            font-size: 1em;
+            /* border-radius: .5em; */
+            /* background-color: rgb(240, 240, 240); */
+            /* border-color: rgb(240, 240, 240); */
+        }
+
+        button:focus {
+            outline: none;
+        }
+
+        /* 通信信息 */
+
+        #tip-1,
+        #tip-2,
+        #tip-3,
+        #confirm-message {
+            display: none;
+        }
+
+        #connection-message-1,
+        #connection-message-2,
+        #connection-message-3 {
+            display: none;
+            resize: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="sudoku">
+        <div id="game">
+            <div id="game-pannel">
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+                <div class="cell" tabindex="0"></div>
+            </div>
+        </div>
+        <div id="state">
+            <h4>网络延迟 <span id="show-delay"></span></h4>
+            <h4>轮到 <span id="show-turn"></span></h4>
+            <h4><button disabled id="confirm">确定</button></h4>
+            <h4><button id="create">新建</button><button disabled id="recreate">断线复盘</button><button
+                    id="passive-create">被动连接</button></h4>
+            <h4 id="tip-1">请将如下信息发送给你的游戏伙伴<br>（通过邮件、通讯软件等）</h4>
+            <p><textarea readonly id="connection-message-1" disabled cols="40" rows="10"></textarea></p>
+            <h4 id="tip-2">请将“收到”的信息黏贴进去并点击确定</h4>
+            <p><textarea id="connection-message-2" disabled cols="40" rows="10"></textarea></p>
+            <p><button disabled id="confirm-message">确定</button></p>
+            <h4 id="tip-3">请将如下信息发送给你的游戏伙伴<br>（通过邮件、通讯软件等）</h4>
+            <p><textarea readonly id="connection-message-3" disabled cols="40" rows="10"></textarea></p>
+        </div>
+    </div>
+
+    <template id="cursor-decoration">
+        <div class="cursor-decoration">
+            <div></div>
+        </div>
+    </template>
+
+    <script>
+        let o = {
+            _notAllowed: false,
+            currentCursorId: undefined,
+            currentCellId: undefined,
+            editedCell: undefined,
+            fill: {
+                rows: new Array(9).fill(0).map(e => new Array(9).fill(false)),
+                columns: new Array(9).fill(0).map(e => new Array(9).fill(false)),
+                cells: new Array(9).fill(0).map(e => new Array(9).fill(false)),
+                set(id, key, value) {
+                    if (arguments.length < 3) { return; }
+                    if (this.danger) {
+                        this.danger = false;
+                        return;
+                    }
+                    key--;
+                    let row = parseInt(id / 9);
+                    let column = parseInt(id % 9);
+                    let cellId = parseInt(row / 3) * 3 + parseInt(column / 3);
+                    this.rows[row][key] = value;
+                    this.columns[column][key] = value;
+                    this.cells[cellId][key] = value;
+                },
+                danger: false
+            },
+            rtc: {
+                SYNCHRONIZE_HANDLE: "synchronizeHandle",
+                SYNCHRONIZE_CHESSBOARD: "synchronizeChessboard",
+                SYNCHRONIZE_CHESSBOARD_SUCCESS: "synchronizeChessBoardSuccess",
+                ROUND_FINISHED: "roundFinished",
+                INTERVAL_MESSAGE: "intervalMessage",
+                connectionConfig: {
+                    iceServers: [{
+                        urls: ["stun:stun1.l.google.com:19302"]
+                    }, {
+                        urls: 'turn:192.158.29.39:3478?transport=tcp',
+                        credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+                        username: '28224511:1379330808'
+                    }]
+                },
+                passive: false,
+                promise: {},
+                clear() {
+                    this.icecandidates = [];
+                    this.localDescription = undefined;
+                    this.dataChannel && this.dataChannel.close();
+                    this.dataChannel = undefined;
+                    this.connection && this.connection.close();
+                    this.connection = undefined;
+                    this.clearPromise();
+                    this.passive = false;
+                },
+                clearPromise() {
+                    this.promise = {};
+                }
+            }
+        };
+        Object.freeze(o.rtc.SYNCHRONIZE_HANDLE);
+        Object.freeze(o.rtc.SYNCHRONIZE_CHESSBOARD);
+        Object.freeze(o.rtc.SYNCHRONIZE_CHESSBOARD_SUCCESS);
+        Object.freeze(o.rtc.ROUND_FINISHED);
+        Object.freeze(o.rtc.INTERVAL_MESSAGE);
+        function autoFill() {
+            let preFilledCounts = new Array(81).fill(0).map(() => Math.random() < 0.5);
+            for (let i = 0; i < 81; i++) {
+                let count = 0;
+                let flag = new Array(9).fill(false);
+                let row = parseInt(i / 9);
+                let column = parseInt(i % 9);
+                let cellId = parseInt(row / 3) * 3 + parseInt(column / 3);
+                while (count < 9) {
+                    let value = parseInt(Math.random() * 9 - 0.000001);
+                    if (flag[value]) { continue; }
+                    flag[value] = true;
+                    count++;
+                    if (!o.fill.cells[cellId][value] && !o.fill.columns[column][value] && !o.fill.rows[row][value]) {
+                        o.fill.cells[cellId][value] = o.fill.columns[column][value] = o.fill.rows[row][value] = true;
+                        o.cells[i].value = value + 1;
+                        count = 0;
+                        break;
+                    }
+                }
+                if (count !== 0) {
+                    for (let i = 0; i < 81; i++) {
+                        o.cells[i].value = 0;
+                    }
+                    for (let i = 0; i < 9; i++) {
+                        for (let j = 0; j < 9; j++) {
+                            o.fill.rows[i][j] = false;
+                            o.fill.columns[i][j] = false;
+                            o.fill.cells[i][j] = false;
+                        }
+                    }
+                    i = -1;
+                }
+            }
+            for (let i = 0; i < 81; i++) {
+                if (preFilledCounts[i]) { continue; }
+                let row = parseInt(i / 9);
+                let column = parseInt(i % 9);
+                let cellId = parseInt(row / 3) * 3 + parseInt(column / 3);
+                let value = o.cells[i].value - 1;
+                o.fill.cells[cellId][value] = o.fill.columns[column][value] = o.fill.rows[row][value] = false;
+                o.cells[i].value = 0;
+            }
+
+            for (let e of o.cells) {
+                if (e.value !== 0) {
+                    e.e.innerHTML = e.value;
+                    e.locked = true;
+                }
+            }
+        }
+        function judge(id) {
+            if (id === undefined) {
+                throw new Error("judge need at least one parameter.");
+                return false;
+            }
+
+            let value = o.cells[id].value - 1;
+            let row = parseInt(id / 9);
+            let column = parseInt(id % 9);
+            let cellId = parseInt(row / 3) * 3 + parseInt(column / 3);
+            return !(o.fill.rows[row][value] || o.fill.columns[column][value] || o.fill.cells[cellId][value]);
+        }
+        function init() {
+            o.showDelay = document.querySelector("#show-delay");
+            o.showTurn = document.querySelector("#show-turn");
+            o.cursorDecoration = document.querySelector("#cursor-decoration").content.children[0];
+            let cells = o.cells = new Array(81);
+            o.gamePannel = { e: document.querySelector("#game-pannel") };
+            Array.prototype.forEach.call(document.querySelectorAll("#game-pannel > .cell"), (e, i) => {
+                cells[i] = { e: e, value: 0, locked: false };
+                cells[i].e.dataset['id'] = i;
+            });
+
+            cells.forEach(e => e.e.addEventListener("click", ee => {
+                if (!o.notAllowed) {
+                    let id = parseInt(ee.target.dataset['id']);
+                    if (o.cells[id].locked === false) {
+                        ee.target.appendChild(o.cursorDecoration);
+                        o.currentCellId = id;
+                    } else {
+                        ee.target.blur();
+                    }
+                }
+            }));
+            cells.forEach(e => e.e.addEventListener("blur", ee => {
+                o.cursorDecoration.remove();
+            }));
+            cells.forEach(e => e.e.addEventListener("mouseenter", ee => {
+                o.currentCursorId = parseInt(ee.target.dataset['id']);
+            }));
+            o.gamePannel.e.addEventListener("keydown", e => {
+                if (o.notAllowed) {
+                    return;
+                }
+                if (e.key === "Enter") {
+                    e.target.blur();
+                    e.stopPropagation();
+                } else if (e.key <= '9' && e.key >= '1' && e.target.classList.contains('cell')) {
+                    let id;
+                    if (o.editedCell) {
+                        id = parseInt(o.editedCell.e.dataset["id"]);
+
+                        o.fill.set(id, o.editedCell.value, false);
+                        o.editedCell.value = 0;
+                        o.editedCell.e.textContent = '';
+                        o.editedCell.e.classList.remove("edited");
+                        o.editedCell.e.classList.remove("danger");
+                    }
+                    id = parseInt(e.target.dataset['id']);
+                    e.target.textContent = e.key;
+                    e.target.blur();
+                    e.target.classList.add("edited");
+                    o.cells[id].value = parseInt(e.key);
+                    o.currentCellId = undefined;
+                    o.editedCell = o.cells[id];
+                    if (judge(id)) {
+                        o.confirmButton.disabled = false;
+                        o.fill.set(id, o.editedCell.value, true);
+                    } else {
+                        o.fill.danger = true;
+                        o.confirmButton.disabled = true;
+                        e.target.classList.remove("edited");
+                        e.target.classList.add("danger");
+                    }
+                } else if (e.key === " " || e.key === "Backspace") {
+                    if (o.editedCell === undefined || e.target.dataset["id"] !== o.editedCell.e.dataset["id"]) {
+                        return;
+                    }
+                    e.target.innerHTML = '';
+                    e.target.appendChild(o.cursorDecoration);
+                    e.target.classList.remove("edited");
+                    e.target.classList.remove("danger");
+                    let id = parseInt(o.editedCell.dataset["id"]);
+                    o.fill.set(id, o.editedCell.value, false);
+                    o.editedCell.value = 0;
+                    o.editedCell = undefined;
+                    o.confirmButton.disabled = true;
+                }
+            }, true);
+
+            o.confirmButton = document.querySelector("#confirm");
+            o.confirmButton.addEventListener("click", () => {
+                o.confirmButton.disabled = true;
+                let id = parseInt(o.editedCell.e.dataset["id"]);
+                let value = o.editedCell.value;
+                o.editedCell.e.classList.remove("edited");
+                o.editedCell.locked = true;
+                o.editedCell = undefined;
+
+                o.notAllowed = true;
+                o.rtc.dataChannel.send(btoa(encodeURIComponent(JSON.stringify({ type: o.rtc.ROUND_FINISHED, id: id, value: value }))));
+            });
+            o.tip1 = document.querySelector("#tip-1");
+            o.tip2 = document.querySelector("#tip-2");
+            o.tip3 = document.querySelector("#tip-3");
+            o.connectionMessage1 = document.querySelector("#connection-message-1");
+            o.connectionMessage1.addEventListener("click", e => e.target.select());
+            o.connectionMessage2 = document.querySelector("#connection-message-2");
+            o.connectionMessage2.addEventListener("click", e => e.target.select());
+            o.confirmMessageButton = document.querySelector("#confirm-message");
+            o.connectionMessage3 = document.querySelector("#connection-message-3");
+            o.connectionMessage3.addEventListener("click", e => e.target.select());
+            o.confirmMessageButton.addEventListener("click", confirmMessage);
+            o.createButton = document.querySelector("#create");
+            o.createButton.addEventListener("click", () => {
+                o.notAllowed = true;
+
+                o.tip1.style.display = "initial";
+                o.connectionMessage1.style.display = "initial";
+                o.connectionMessage1.disabled = false;
+                o.tip2.style.display = "initial";
+                o.connectionMessage2.style.display = "initial";
+                o.connectionMessage2.disabled = false;
+                o.confirmMessageButton.style.display = "initial";
+                o.confirmMessageButton.disabled = false;
+                o.tip3.style.display = "none";
+                o.connectionMessage3.style.display = "none";
+                o.connectionMessage3.disabled = true;
+
+                o.rtc.clear();
+                createDataChannel().then(() => {
+                    autoFill();
+                    return synchronizeChessBoard();
+                }).then(() => {
+                    o.tip1.style.display = "none";
+                    o.connectionMessage1.style.display = "none";
+                    o.connectionMessage1.disabled = true;
+                    o.tip2.style.display = "none";
+                    o.connectionMessage2.style.display = "none";
+                    o.connectionMessage2.disabled = true;
+                    o.confirmMessageButton.style.display = "none";
+                    o.confirmMessageButton.disabled = true;
+                    o.tip3.style.display = "none";
+                    o.connectionMessage3.style.display = "none";
+                    o.connectionMessage3.disabled = true;
+
+                    o.createButton.disabled = true;
+                    o.passiveCreateButton.disabled = true;
+
+                    o.notAllowed = false;
+                    o.confirmButton.disabled = false;
+                }).then(() => o.rtc.dataChannel.send(btoa(encodeURIComponent(JSON.stringify({ type: o.rtc.SYNCHRONIZE_HANDLE, notAllowed: !o.notAllowed })))));
+            });
+            o.reCreateButton = document.querySelector("#recreate");
+            o.reCreateButton.addEventListener("click", () => {
+                let state = o.notAllowed;
+                o.notAllowed = true;
+
+                o.tip1.style.display = "initial";
+                o.connectionMessage1.style.display = "initial";
+                o.connectionMessage1.disabled = false;
+                o.tip2.style.display = "initial";
+                o.connectionMessage2.style.display = "initial";
+                o.connectionMessage2.disabled = false;
+                o.confirmMessageButton.style.display = "initial";
+                o.confirmMessageButton.disabled = false;
+                o.tip3.style.display = "none";
+                o.connectionMessage3.style.display = "none";
+                o.connectionMessage3.disabled = true;
+
+                o.rtc.clear();
+                createDataChannel().then(() => synchronizeChessBoard()).then(() => {
+                    o.tip1.style.display = "none";
+                    o.connectionMessage1.style.display = "none";
+                    o.connectionMessage1.disabled = true;
+                    o.tip2.style.display = "none";
+                    o.connectionMessage2.style.display = "none";
+                    o.connectionMessage2.disabled = true;
+                    o.confirmMessageButton.style.display = "none";
+                    o.confirmMessageButton.disabled = true;
+                    o.tip3.style.display = "none";
+                    o.connectionMessage3.style.display = "none";
+                    o.connectionMessage3.disabled = true;
+
+                    o.createButton.disabled = true;
+                    o.passiveCreateButton.disabled = true;
+
+                    o.notAllowed = state;
+                    o.confirmButton.disabled = state;
+                }).then(() => o.rtc.dataChannel.send(btoa(encodeURIComponent(JSON.stringify({ type: o.rtc.SYNCHRONIZE_HANDLE, notAllowed: !o.notAllowed })))));
+
+            });
+            o.passiveCreateButton = document.querySelector("#passive-create");
+            o.passiveCreateButton.addEventListener("click", () => {
+                o.notAllowed = true;
+
+                o.tip1.style.display = "none";
+                o.connectionMessage1.style.display = "none";
+                o.connectionMessage1.disabled = true;
+                o.tip2.style.display = "initial";
+                o.connectionMessage2.style.display = "initial";
+                o.connectionMessage2.disabled = false;
+                o.confirmMessageButton.style.display = "initial";
+                o.confirmMessageButton.disabled = false;
+                o.tip3.style.display = "initial";
+                o.connectionMessage3.style.display = "initial";
+                o.connectionMessage3.disabled = false;
+
+                o.rtc.clear();
+                o.rtc.passive = true;
+                waitForCDC().then(() => {
+                    o.tip1.style.display = "none";
+                    o.connectionMessage1.style.display = "none";
+                    o.connectionMessage1.disabled = true;
+                    o.tip2.style.display = "none";
+                    o.connectionMessage2.style.display = "none";
+                    o.connectionMessage2.disabled = true;
+                    o.confirmMessageButton.style.display = "none";
+                    o.confirmMessageButton.disabled = true;
+                    o.tip3.style.display = "none";
+                    o.connectionMessage3.style.display = "none";
+                    o.connectionMessage3.disabled = true;
+
+                    o.createButton.disabled = true;
+                    o.passiveCreateButton.disabled = true;
+                });
+            });
+
+
+            Reflect.defineProperty(o, 'notAllowed', {
+                get: () => o._notAllowed,
+                set(value) {
+                    o._notAllowed = !!value;
+                    if (o._notAllowed) {
+                        o.gamePannel.e.classList.add("not-allowed");
+                        o.showTurn.innerHTML = "对方";
+                    } else {
+                        o.gamePannel.e.classList.remove("not-allowed");
+                        o.showTurn.innerHTML = "自己";
+                    }
+                }
+            });
+
+            o.notAllowed = true;
+        }
+
+        function createDataChannel() {
+            let connection = o.rtc.connection = new RTCPeerConnection(o.rtc.connectionConfig);
+            connection.onicegatheringstatechange = () => {
+                if (connection.iceGatheringState === "complete") {
+                    o.rtc.promise.hostGatheringComplete();
+                }
+            };
+            o.rtc.icecandidates = [];
+            connection.onicecandidate = e => {
+                if (!e.candidate) { return; }
+                o.rtc.icecandidates.push(e.candidate.toJSON());
+            };
+            let dataChannel = o.rtc.dataChannel = connection.createDataChannel("SudokuGame");
+            dataChannel.onopen = () => {
+                console.log("dataChannel opened.");
+                o.rtc.promise.createFinished && o.rtc.promise.createFinished();
+
+                setInterval(() => {
+                    dataChannel.send(btoa(encodeURIComponent(JSON.stringify({ type: o.rtc.INTERVAL_MESSAGE, timestamp: Date.now() }))));
+                }, 1000);
+            }
+            dataChannel.onmessage = e => {
+                let data = JSON.parse(decodeURIComponent(atob(e.data)));
+                if (data.type === o.rtc.SYNCHRONIZE_CHESSBOARD_SUCCESS) {
+                    o.rtc.promise.synchronizeChessBoardSuccess();
+                } else if (data.type === o.rtc.ROUND_FINISHED) {
+                    o.cells[data.id].value = data.value;
+                    o.cells[data.id].e.innerHTML = data.value;
+                    o.cells[data.id].locked = true;
+                    o.fill.set(data.id, data.value, true);
+
+                    o.confirmButton.disabled = false;
+                    o.notAllowed = false;
+                } else if (data.type === o.rtc.INTERVAL_MESSAGE) {
+                    o.showDelay.innerHTML = `${Math.abs(Date.now() - data.timestamp)}ms`;
+                }
+            };
+            dataChannel.onclose = () => { console.log("dataChannel closed.") }
+
+            connection.createOffer().then(s => {
+                connection.setLocalDescription(s);
+                o.connectionMessage1.value = "连接中...";
+                return new Promise(r => o.rtc.promise.hostGatheringComplete = r);
+            }).then(() => o.rtc.localDescription = o.rtc.connection.localDescription.toJSON()).then(() => {
+                o.connectionMessage1.value = "";
+                setTimeout(() => {
+                    let json = JSON.stringify({ localDescription: o.rtc.connection.localDescription.toJSON(), icecandidates: o.rtc.icecandidates });
+                    let encryptJSON = btoa(encodeURIComponent(json));
+                    o.connectionMessage1.value = encryptJSON;
+                }, 200);
+            });;
+            return new Promise(resolve => o.rtc.promise.createFinished = resolve);
+        }
+        function synchronizeChessBoard() {
+            o.rtc.dataChannel.send(btoa(encodeURIComponent(JSON.stringify({
+                type: o.rtc.SYNCHRONIZE_CHESSBOARD,
+                fill: { rows: o.fill.rows, columns: o.fill.columns, cells: o.fill.cells },
+                cells: o.cells.map(e => { return { value: e.value, locked: e.locked }; })
+            }))));
+            return new Promise(e => o.rtc.promise.synchronizeChessBoardSuccess = e);
+        }
+        function waitForCDC() {
+            let connection = o.rtc.connection = new RTCPeerConnection(o.rtc.connectionConfig);
+            connection.onicegatheringstatechange = () => {
+                if (connection.iceGatheringState === "complete") {
+                    o.rtc.promise.passiveGatheringComplete();
+                }
+            };
+            connection.onicecandidate = e => {
+                if (!e.candidate) { return; }
+                o.rtc.icecandidates.push(e.candidate.toJSON());
+            };
+            connection.ondatachannel = e => {
+                let dataChannel = o.rtc.dataChannel = e.channel;
+                dataChannel.onopen = e => {
+                    console.log("dataChannel opened.");
+
+                    setInterval(() => {
+                        dataChannel.send(btoa(encodeURIComponent(JSON.stringify({ type: o.rtc.INTERVAL_MESSAGE, timestamp: Date.now() }))));
+                    }, 1000);
+                };
+                dataChannel.onmessage = e => {
+                    let data = JSON.parse(decodeURIComponent(atob(e.data)));
+                    if (data.type === o.rtc.SYNCHRONIZE_HANDLE) {
+                        o.notAllowed = data.notAllowed;
+                        o.confirmButton.disabled = o.notAllowed;
+                    } else if (data.type === o.rtc.SYNCHRONIZE_CHESSBOARD) {
+                        for (let i = 0; i < 9; i++) {
+                            for (let j = 0; j < 9; j++) {
+                                o.fill.rows[i][j] = data.fill.rows[i][j];
+                                o.fill.columns[i][j] = data.fill.columns[i][j];
+                                o.fill.cells[i][j] = data.fill.cells[i][j];
+                            }
+                        }
+                        for (let i = 0; i < 81; i++) {
+                            o.cells[i].value = data.cells[i].value;
+                            o.cells[i].value = data.cells[i].locked;
+                            if (o.cells[i].value != 0) {
+                                o.cells[i].e.innerHTML = data.cells[i].value;
+                            }
+                        }
+                        o.rtc.promise.passiveCreateFinished();
+                        o.rtc.dataChannel.send(btoa(encodeURIComponent(JSON.stringify({ type: o.rtc.SYNCHRONIZE_CHESSBOARD_SUCCESS }))));
+                    } else if (data.type === o.rtc.ROUND_FINISHED) {
+                        o.cells[data.id].value = data.value;
+                        o.cells[data.id].e.innerHTML = data.value;
+                        o.cells[data.id].locked = true;
+                        o.fill.set(data.id, data.value, true);
+
+                        o.confirmButton.disabled = false;
+                        o.notAllowed = false;
+                    } else if (data.type === o.rtc.INTERVAL_MESSAGE) {
+                        o.showDelay.innerHTML = `${Date.now() - data.timestamp}ms`;
+                    }
+                };
+                dataChannel.onclose = e => { console.log("dataChannel closed.") };
+            };
+
+            return new Promise(r => o.rtc.promise.passiveCreateFinished = r);
+        }
+        function confirmMessage() {
+            if (o.connectionMessage2.value === "") {
+                return;
+            }
+            o.confirmMessageButton.disabled = true;
+            let text = o.connectionMessage2.value;
+            let json = JSON.parse(decodeURIComponent(atob(text)));
+            if (o.rtc.passive) {
+                o.rtc.connection.setRemoteDescription(json.localDescription)
+                    .then(() => { json.icecandidates.forEach(e => o.rtc.connection.addIceCandidate(e)) })
+                    .then(() => o.rtc.connection.createAnswer())
+                    .then(s => {
+                        o.rtc.connection.setLocalDescription(s);
+                        o.connectionMessage3.value = "连接中...";
+                        return new Promise(r => o.rtc.promise.passiveGatheringComplete = r);
+                    }).then(() => o.rtc.localDescription = o.rtc.connection.localDescription.toJSON()).then(() => {
+                        o.connectionMessage3.value = "";
+                        setTimeout(() => {
+                            let json = JSON.stringify({ localDescription: o.rtc.connection.localDescription.toJSON(), icecandidates: o.rtc.icecandidates });
+                            let encryptJSON = btoa(encodeURIComponent(json));
+                            o.connectionMessage3.value = encryptJSON;
+                        }, 200);
+                    });
+            } else {
+                o.rtc.connection.setRemoteDescription(json.localDescription)
+                    .then(() => {
+                        o.rtc.icecandidates.forEach(e => o.rtc.connection.addIceCandidate(e));
+                    });
+            }
+        }
+        document.addEventListener("DOMContentLoaded", init);
+    </script>
+</body>
+
+</html>

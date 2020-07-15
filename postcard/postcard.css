@@ -1,0 +1,132 @@
+@font-face {
+    font-family: 'typewriter';
+    src: url('veteran_typewriter-webfont.eot');
+    src: url('veteran_typewriter-webfont.eot?#iefix') format('embedded-opentype'),
+         url('veteran_typewriter-webfont.woff2') format('woff2'),
+         url('veteran_typewriter-webfont.woff') format('woff'),
+         url('veteran_typewriter-webfont.ttf') format('truetype'),
+         url('veteran_typewriter-webfont.svg#secret_typewriterregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'handwriting';
+    src: url('journal-webfont.eot');
+    src: url('journal-webfont.eot?#iefix') format('embedded-opentype'),
+         url('journal-webfont.woff2') format('woff2'),
+         url('journal-webfont.woff') format('woff'),
+         url('journal-webfont.ttf') format('truetype'),
+         url('journal-webfont.svg#journalregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+body {
+	background: black;
+	padding: 2em;
+}
+
+form {
+	position: relative;
+	background: white url(https://media.prod.mdn.mozit.cloud/attachments/2012/11/02/4151/2214c56af622285485f3c34ac88470f6/background.jpg);
+	width: 740px;
+	height: 498px;
+	margin: 0 auto;
+	font : 1.2em "typewriter", sans-serif;
+}
+
+h1 {
+	position : absolute;
+	left : 415px;
+	top  : 185px;
+
+	font : 1em "typewriter", sans-serif;
+}
+
+#from {
+	position: absolute;
+	left : 393px;
+	top  : 235px;
+}
+
+#reply {
+	position: absolute;
+	left : 385px;
+	top  : 285px;
+}
+
+#message {
+	position: absolute;
+	left : 20px;
+	top  : 70px;
+}
+
+input[type=text]
+,input[type=email] {
+	font: 1.2em/1em "handwriting", sans-serif;
+	padding : 0 10px;
+	margin  : 0;
+	width   : 240px;
+	border: none;
+	background: none;
+}
+
+input {
+	height: 1.5em;
+	vertical-align: middle;
+}
+
+input[type=text]:focus
+,input[type=email]:focus
+, textarea:focus {
+	background-color: rgba(0,0,0,0.1);
+}
+
+textarea {
+	background: none;
+	font: 1.5em/1em "handwriting", sans-serif;
+	display: block;
+	border: none;
+	padding : 10px;
+	margin  : 10px 0 0 -10px;
+	width: 340px;
+	height: 360px;
+	resize: none;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+button {
+	position     : absolute;
+	left         : 440px;
+	top          : 360px;
+
+	padding      : 5px;
+
+	font         : bold .6em sans-serif;
+	border       : 2px solid #333;
+	border-radius: 5px;
+	background   : none;
+
+	cursor       : pointer;
+
+	-webkit-transform: rotate(-1.5deg);
+	   -moz-transform: rotate(-1.5deg);
+		-ms-transform: rotate(-1.5deg);
+		 -o-transform: rotate(-1.5deg);
+			transform: rotate(-1.5deg);
+}
+
+button:after {
+	content: " >>>";
+}
+
+button:hover,
+button:focus {
+	outline   : none;
+	background: #000;
+	color   : #FFF;
+}

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ES MODULE TEST</title>
+</head>
+
+<body>
+    <script type="module">
+        import f1 from "./module1.js";
+        f1();
+
+        import * as obj1 from "http://localhost:8013/module2.js";
+        console.log(obj1);
+    </script>
+</body>
+
+</html>
