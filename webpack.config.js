@@ -9,10 +9,13 @@ module.exports = {
         print: "./print.js"
     },
     devtool: 'inline-source-map',
+    devServer: {
+        contentBase: './dist'
+    },
     plugins: [
         // new CleanWebpackPlugin(['dist']),
         new HtmlWebpackPlugin({
-            title: 'Output Management'
+            title: 'Course 4.01'
         })
     ],
     output: {
